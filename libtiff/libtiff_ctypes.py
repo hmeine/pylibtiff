@@ -296,18 +296,18 @@ class TIFF(ctypes.c_void_p):
             raise NotImplementedError (`sample_format`)
         return typ
 
-    @debug
-    def read_image(self, verbose=False):
-        """ Read image from TIFF and return it as an array.
-        """
-        width = self.GetField('ImageWidth')
-        height = self.GetField('ImageLength')
+    def get_numpy_type_from_fields(self):
         bits = self.GetField('BitsPerSample')
         sample_format = self.GetField('SampleFormat')
-        compression = self.GetField('Compression')
-
+        
+        # FIXME: how about removing the @staticmethod from
+        # get_numpy_type, and reading the fields directly instead of
+        # passing by parameter?
+        # Probably, get_numpy_type_from_fields can be removed then.
         typ = self.get_numpy_type(bits, sample_format)
 
+        # FIXME: looking at get_numpy_type above, how can `typ` by None at all?
+        # (I would expect a NotImplementedError)
         if typ is None:
             if bits==1: # TODO: check for correctness
                 typ = np.uint8
@@ -318,10 +318,88 @@ class TIFF(ctypes.c_void_p):
             else:
                 raise NotImplementedError (`bits`)
         else:
+            # FIXME: copy() uses //, is there a reason for this discrepancy?
+            # also, it has:   assert bits >=8, `bits, sample_format`
             itemsize = bits/8
 
-        size = width * height * itemsize
-        arr = np.zeros((height, width), typ)
+        # actually, we don't need to compute itemsize, since this is
+        # available from the dtype already:
+        assert itemsize == typ().itemsize, `(itemsize, typ, typ().itemsize)`
+        return typ
+
+    def image_shape(self):
+        """ Return shape tuple (2D or 3D) for (fortran-order) image arrays.
+
+        This is usually (height, width), but may be (depth, height,
+        width) for 3D image data (esoteric, needs tiled TIFFs).
+        """
+        width = self.GetField('ImageWidth')
+        height = self.GetField('ImageLength')
+        depth = self.GetField('ImageDepth')
+        if depth is not None:
+            return (depth, height, width)
+        return (height, width)
+
+    def image_size(self):
+        """ Convenience method returning reversed(`image_shape()`),
+        i.e. usually (width, height).
+        """
+        return reversed(self.image_shape())
+
+    def tile_shape(self):
+        """ Equivalent to `image_shape()`, but returns extent of tiles
+        for tiled TIFFs.
+
+        Raises RuntimeError if this TIFF is striped (not tiled).
+        """
+        width = self.GetField('TileWidth')
+        height = self.GetField('TileLength')
+        depth = self.GetField('TileDepth')
+
+        if width is None or height is None or not self.IsTiled():
+            raise RuntimeError, 'TIFF.tile_shape() called on non-tiled TIFF'
+
+        if depth is not None:
+            return (depth, height, width)
+        return (height, width)
+
+    @debug
+    def read_image(self, verbose=False):
+        """ Read image from TIFF and return it as an array.
+        """
+        compression = self.GetField('Compression')
+
+        arr = np.zeros(self.image_shape(), self.get_numpy_type_from_fields())
+
+        if self.IsTiled():
+            if self.GetField(TIFFTAG_PLANARCONFIG) != PLANARCONFIG_CONTIG:
+                raise NotImplementedError, 'tiled TIFFs with PLANARCONFIG_SEPARATE not supported yet'
+
+            tile = np.zeros(self.tile_shape(), self.get_numpy_type_from_fields())
+            assert tile.nbytes == self.TileSize()
+            
+            assert arr.ndim == tile.ndim
+            if arr.ndim < 3:
+                # temporarily increase dimensions for easier looping:
+                arr = arr[None]
+                tile = tile[None]
+            
+            image_shape = numpy.array(arr.shape)
+            tile_shape  = numpy.array(tile.shape)
+            for z in numpy.arange(0, image_shape[0], tile_shape[0]):
+                for y in numpy.arange(0, image_shape[1], tile_shape[1]):
+                    for x in numpy.arange(0, image_shape[2], tile_shape[2]):
+                        # read tile (always full size)
+                        self.ReadTile(tile.ctypes.data, x, y, z, 0)
+                        # copy tile data, truncate spatially if necessary
+                        ts = numpy.minimum(tile_shape, image_shape - (z, y, x))
+                        arr[z:z+ts[0], y:y+ts[1], x:x+ts[2]] = tile[:ts[0],:ts[1],:ts[2]]
+
+            if len(self.tile_shape()) < 3:
+                # revert temporarily increased dimension
+                arr = arr[0]
+
+            return arr
 
         if compression==COMPRESSION_NONE:
             ReadStrip = self.ReadRawStrip
@@ -330,6 +408,7 @@ class TIFF(ctypes.c_void_p):
 
         pos = 0
         elem = None
+        size = arr.nbytes
         for strip in range (self.NumberOfStrips()):
             if elem is None:
                 elem = ReadStrip(strip, arr.ctypes.data + pos, size)
@@ -511,26 +590,45 @@ class TIFF(ctypes.c_void_p):
     def IsMSB2LSB(self): return libtiff.TIFFIsMSB2LSB(self)
     @debug
     def NumberOfStrips(self): return libtiff.TIFFNumberOfStrips(self).value
+    @debug
+    def NumberOfTiles(self): return libtiff.TIFFNumberOfTiles(self).value
 
-    #@debug
-    def ReadRawStrip(self, strip, buf, size):
-        return libtiff.TIFFReadRawStrip(self, strip, buf, size).value
+    def ReadTile(self, buf, x, y, z, sample = 0):
+        return libtiff.TIFFReadTile(self, buf, x, y, z, sample).value
+    def WriteTile(self, buf, x, y, z, sample = 0):
+        return libtiff.TIFFWriteTile(self, buf, x, y, z, sample).value
+
     def ReadEncodedStrip(self, strip, buf, size):
         return libtiff.TIFFReadEncodedStrip(self, strip, buf, size).value
+    def ReadRawStrip(self, strip, buf, size):
+        return libtiff.TIFFReadRawStrip(self, strip, buf, size).value
+    def ReadEncodedTile(self, tile, buf, size):
+        return libtiff.TIFFReadEncodedTile(self, tile, buf, size).value
+    def ReadRawTile(self, tile, buf, size):
+        return libtiff.TIFFReadRawTile(self, tile, buf, size).value
 
     def StripSize(self):
         return libtiff.TIFFStripSize(self).value
     def RawStripSize(self, strip):
-        return libtiff.TIFFStripSize(self, strip).value
-
-    @debug
-    def WriteRawStrip(self, strip, buf, size):
-        r = libtiff.TIFFWriteRawStrip(self, strip, buf, size)
-        assert r.value==size,`r.value, size`
+        return libtiff.TIFFRawStripSize(self, strip).value
+    def TileSize(self):
+        return libtiff.TIFFTileSize(self).value
 
     @debug
     def WriteEncodedStrip(self, strip, buf, size):
         r = libtiff.TIFFWriteEncodedStrip(self, strip, buf, size)
+        assert r.value==size,`r.value, size`
+    @debug
+    def WriteRawStrip(self, strip, buf, size):
+        r = libtiff.TIFFWriteRawStrip(self, strip, buf, size)
+        assert r.value==size,`r.value, size`
+    @debug
+    def WriteEncodedTile(self, tile, buf, size):
+        r = libtiff.TIFFWriteEncodedTile(self, tile, buf, size)
+        assert r.value==size,`r.value, size`
+    @debug
+    def WriteRawTile(self, tile, buf, size):
+        r = libtiff.TIFFWriteRawTile(self, tile, buf, size)
         assert r.value==size,`r.value, size`
 
     closed = False
@@ -538,8 +636,6 @@ class TIFF(ctypes.c_void_p):
         if not self.closed and self.value is not None:
             libtiff.TIFFClose(self)
             self.closed = True
-        return
-    #def (self): return libtiff.TIFF(self)
 
     @debug
     def GetField(self, tag, ignore_undefined_tag=True):
@@ -666,7 +762,7 @@ class TIFF(ctypes.c_void_p):
             other.SetDirectory(self.CurrentDirectory())
             bits = self.GetField('BitsPerSample')
             sample_format = self.GetField('SampleFormat')
-            assert bits >=8, `bits, sample_format, dtype`
+            assert bits >=8, `bits, sample_format`
             itemsize = bits // 8
             dtype = self.get_numpy_type(bits, sample_format)
             for name, define in name_define_list:
@@ -688,7 +784,6 @@ class TIFF(ctypes.c_void_p):
             assert new_bits >=8, `new_bits, new_sample_format, new_dtype`
             new_itemsize = new_bits // 8
             strip_size = self.StripSize()
-            new_strip_size = self.StripSize()
             buf = np.zeros(strip_size // itemsize, dtype)
             for strip in range(self.NumberOfStrips()):
                 elem = self.ReadEncodedStrip(strip, buf.ctypes.data, strip_size)
@@ -815,6 +910,51 @@ libtiff.TIFFStripSize.argtypes = [TIFF]
 
 libtiff.TIFFRawStripSize.restype = c_tsize_t
 libtiff.TIFFRawStripSize.argtypes = [TIFF, c_tstrip_t]
+
+libtiff.TIFFVStripSize.restype = c_tsize_t
+libtiff.TIFFVStripSize.argtypes = [TIFF, ctypes.c_uint32]
+
+libtiff.TIFFTileRowSize.restype = c_tsize_t
+libtiff.TIFFTileRowSize.argtypes = [TIFF]
+
+libtiff.TIFFTileSize.restype = c_tsize_t
+libtiff.TIFFTileSize.argtypes = [TIFF]
+
+libtiff.TIFFVTileSize.restype = c_tsize_t
+libtiff.TIFFVTileSize.argtypes = [TIFF, ctypes.c_uint32]
+
+libtiff.TIFFDefaultStripSize.restype = ctypes.c_uint32
+libtiff.TIFFDefaultStripSize.argtypes = [TIFF]
+
+libtiff.TIFFDefaultTileSize.restype = None
+libtiff.TIFFDefaultTileSize.argtypes = [TIFF, ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_uint32)]
+
+libtiff.TIFFComputeTile.restype = c_ttile_t
+libtiff.TIFFComputeTile.argtypes = [TIFF, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32, c_tsample_t]
+
+libtiff.TIFFCheckTile.restype = ctypes.c_int
+libtiff.TIFFCheckTile.argtypes = [TIFF, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32, c_tsample_t]
+
+libtiff.TIFFNumberOfTiles.restype = c_ttile_t
+libtiff.TIFFNumberOfTiles.argtypes = [TIFF]
+
+libtiff.TIFFReadTile.restype = c_tsize_t
+libtiff.TIFFReadTile.argtypes = [TIFF, c_tdata_t, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32, c_tsample_t]
+
+libtiff.TIFFWriteTile.restype = c_tsize_t
+libtiff.TIFFWriteTile.argtypes = [TIFF, c_tdata_t, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32, c_tsample_t]
+
+libtiff.TIFFReadEncodedTile.restype = c_tsize_t
+libtiff.TIFFReadEncodedTile.argtypes = [TIFF, c_ttile_t, c_tdata_t, c_tsize_t]
+
+libtiff.TIFFReadRawTile.restype = c_tsize_t
+libtiff.TIFFReadRawTile.argtypes = [TIFF, c_ttile_t, c_tdata_t, c_tsize_t]
+
+libtiff.TIFFWriteEncodedTile.restype = c_tsize_t
+libtiff.TIFFWriteEncodedTile.argtypes = [TIFF, c_ttile_t, c_tdata_t, c_tsize_t]
+
+libtiff.TIFFWriteRawTile.restype = c_tsize_t
+libtiff.TIFFWriteRawTile.argtypes = [TIFF, c_ttile_t, c_tdata_t, c_tsize_t]
 
 libtiff.TIFFClose.restype = None
 libtiff.TIFFClose.argtypes = [TIFF]
