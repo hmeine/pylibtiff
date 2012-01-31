@@ -47,12 +47,20 @@ file and pylibtiff module), and run::
 
   python setup.py install
 
+If you also want to install the testing frontends, use install_scripts::
+
+  python setup.py install install_scripts
+
 Testing
 =======
 
 To test pure Python pylibtiff from source directory, run::
 
   nosetests libtiff/tests/
+
+This might require an in-place installation of the DLLs::
+
+  python setup.py install --install-lib .
 
 Basic usage
 ===========
