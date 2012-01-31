@@ -157,7 +157,7 @@ class FunctionWrapper (object):
             print "Exception in runner process:"
             print '-'*60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60        
+            print '-'*60
             status = 1
 
         if self.log_queue is not None:
@@ -233,7 +233,7 @@ class OptionPanel( wx.Panel ):
                     ctrl = wx.ComboBox(
                         self, -1, choices = map(str,option.choices),
                         value = str(option.default),
-                        style = wx.CB_DROPDOWN | wx.CB_READONLY | wx.CB_SORT 
+                        style = wx.CB_DROPDOWN | wx.CB_READONLY | wx.CB_SORT
                     )
                     sizer.Add (ctrl, 0, wx.EXPAND)
                     sizer.Add ((20,20),0)
@@ -244,7 +244,7 @@ class OptionPanel( wx.Panel ):
                     sizer.Add (ctrl, 0, wx.EXPAND)
                     sizer.Add ((20,20),0)
                 elif option.type == 'multiline':
-                    ctrl = wx.TextCtrl( self, -1, "", size=(300,100), 
+                    ctrl = wx.TextCtrl( self, -1, "", size=(300,100),
                                         style = wx.TE_MULTILINE|wx.TE_PROCESS_ENTER )
                     if option.default not in [optparse.NO_DEFAULT, None]:
                         ctrl.Value = option.default
@@ -334,7 +334,7 @@ class OptparseFrame (wx.Frame):
     def __init__(self, option_parser):
 
         self.option_parser = option_parser
-        self.option_parser.result = None 
+        self.option_parser.result = None
         self.capture_std_streams()
         run_methods = getattr(option_parser, 'run_methods', ['subprocess', 'subcommand'])
 
@@ -364,7 +364,7 @@ class OptparseFrame (wx.Frame):
             pages.append(group)
 
         sizer_a = wx.BoxSizer (wx.VERTICAL)
-        self.args_ctrl = args_ctrl = wx.TextCtrl(p, -1, '', size = ( -1, 80 ), 
+        self.args_ctrl = args_ctrl = wx.TextCtrl(p, -1, '', size = ( -1, 80 ),
                                                  style=wx.TE_MULTILINE | wx.TE_PROCESS_ENTER )
         args_ctrl.SetHelpText ('''\
 Arguments can be either separated by a space or a newline. Arguments
@@ -413,7 +413,7 @@ that contain spaces must be entered like so: "arg with space"\
                 runner_mth = wx.ComboBox(
                     p, -1, choices = run_methods,
                     value = run_methods[0],
-                    style = wx.CB_DROPDOWN | wx.CB_READONLY | wx.CB_SORT 
+                    style = wx.CB_DROPDOWN | wx.CB_READONLY | wx.CB_SORT
                     )
                 runner_mth.SetHelpText ('Specify how to run application. Selecting subprocess means using multiprocessing.Process. Selecting subcommand means running the application with --no-gui option and using specified options. If application uses wx then one should select subcommand.')
 
@@ -505,7 +505,7 @@ that contain spaces must be entered like so: "arg with space"\
         msg += '\n'
         msg += '-'*40 + '\n'
         msg += 'Options\n'
-        msg += '='*40 + '\n'    
+        msg += '='*40 + '\n'
         try:
             values, args = self.option_parser.parse_options_args
             self.set_result()
@@ -620,7 +620,7 @@ that contain spaces must be entered like so: "arg with space"\
         new_options, new_args = self.option_parser.get_result (values)
         if method=='subprocess':
             process = multiprocessing.Process(target=FunctionWrapper(self.option_parser.runner,
-                                                                     self.log_queue), 
+                                                                     self.log_queue),
                                               args=(self.option_parser, new_options, new_args))
             process.start ()
             return process
@@ -907,8 +907,8 @@ class OptionParser( optparse.OptionParser ):
 
     def get_history_file(self):
         import hashlib
-        script_history = os.path.join(os.environ.get('HOME',''), '.optparse_history', 
-                                      os.path.basename(sys.argv[0]) + hashlib.md5(os.path.abspath(sys.argv[0])).hexdigest())        
+        script_history = os.path.join(os.environ.get('HOME',''), '.optparse_history',
+                                      os.path.basename(sys.argv[0]) + hashlib.md5(os.path.abspath(sys.argv[0])).hexdigest())
         return script_history
 
 
@@ -931,7 +931,7 @@ class OptionParser( optparse.OptionParser ):
                 value = getattr(values, option.dest, None)
                 if value is not None:
                     f.write('%s: %r\n' % (option.dest, value))
-        f.close()        
+        f.close()
 
         shutil.move(tmp_file, script_history)
         
@@ -957,7 +957,7 @@ class OptionParser( optparse.OptionParser ):
                     h_cwd = value
                 else:
                     self._set_dest_value(dest, value, h_cwd)
-            f.close()        
+            f.close()
         return h_args
 
     def parse_args( self, args = None, values = None ):
@@ -1007,7 +1007,7 @@ class OptionParser( optparse.OptionParser ):
         print "AN ERROR OCCURRED WITH A MESSAGE: %s" % (msg)
         #app = wx.GetApp()
         #print app, msg
-        #if app is None:    
+        #if app is None:
         #    app = wx.App( False )
         #wx.MessageDialog( None, msg, 'Error!', wx.ICON_ERROR ).ShowModal()
         return self._SUPER.error( self, msg )

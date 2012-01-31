@@ -159,7 +159,7 @@ class TIFFimage:
         self.description = description
 
     def write_file(self, filename, compression='none',
-                   strip_size = 2**13, planar_config = 1,                   
+                   strip_size = 2**13, planar_config = 1,
                    validate = False, verbose=None):
         """
         Write image data to TIFF file.
@@ -368,7 +368,7 @@ class TIFFimage:
 
             if verbose:
                 sys.stdout.write('\r  filling records: %5s%% done (%s/s)%s' \
-                                     % (int(100.0*(i+1)/len(image_directories)), 
+                                     % (int(100.0*(i+1)/len(image_directories)),
                                         bytes2str(int((image_data_offset-first_image_data_offset)/(time.time ()-start_time))),
                                         ' '*2))
                 if (i+1)==len (image_directories):
@@ -387,7 +387,7 @@ class TIFFimage:
             tif._mmap.resize(total_size)
             if verbose:
                 sys.stdout.write('  resized records: %s -> %s (compression: %.2fx)\n' \
-                                     % (bytes2str(total_size + sdiff), bytes2str(total_size), 
+                                     % (bytes2str(total_size + sdiff), bytes2str(total_size),
                                         compression))
                 sys.stdout.flush ()
         del tif # flushing

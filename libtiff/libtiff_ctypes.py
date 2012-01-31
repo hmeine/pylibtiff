@@ -109,7 +109,7 @@ for name, value in d.items():
     exec '%s = %s' % (name, value)
     for n in define_to_name_map:
         if name.startswith(n.upper()):
-            define_to_name_map[n][value] = name        
+            define_to_name_map[n][value] = name
             name_to_define_map[n][name] = value
 
                 
@@ -139,7 +139,7 @@ tifftags = {
 #TIFFTAG_TRANSFERFUNCTION        1 or 3 uint16**          1<<BitsPerSample entry arrays
 #TIFFTAG_ICCPROFILE              2      uint32*,void**    count, profile data
 
-    # TIFFTAG: type, conversion  
+    # TIFFTAG: type, conversion
     TIFFTAG_ARTIST: (ctypes.c_char_p, lambda d:d.value),
     TIFFTAG_COPYRIGHT: (ctypes.c_char_p, lambda d:d.value),
     TIFFTAG_DATETIME: (ctypes.c_char_p, lambda d:d.value),
@@ -354,7 +354,7 @@ class TIFF(ctypes.c_void_p):
         if isinstance(value, int):
             return value
         elif value is None:
-            return SAMPLEFORMAT_UINT            
+            return SAMPLEFORMAT_UINT
         elif isinstance(value, str):
             return dict(int=SAMPLEFORMAT_INT, uint=SAMPLEFORMAT_UINT,
                         float=SAMPLEFORMAT_IEEEFP, complex=SAMPLEFORMAT_COMPLEXIEEEFP)[value.lower()]
@@ -425,7 +425,7 @@ class TIFF(ctypes.c_void_p):
             if sample_format is not None:
                 self.SetField(TIFFTAG_SAMPLEFORMAT, sample_format)
 
-            WriteStrip(0, arr.ctypes.data, size)            
+            WriteStrip(0, arr.ctypes.data, size)
             self.WriteDirectory()
         elif len(shape)==3:
             depth, height, width = shape
@@ -492,7 +492,7 @@ class TIFF(ctypes.c_void_p):
     @debug
     def ReadDirectory(self): return libtiff.TIFFReadDirectory(self)
     @debug
-    def WriteDirectory(self): 
+    def WriteDirectory(self):
         r = libtiff.TIFFWriteDirectory(self)
         assert r==1, `r`
     @debug
@@ -513,28 +513,28 @@ class TIFF(ctypes.c_void_p):
     def NumberOfStrips(self): return libtiff.TIFFNumberOfStrips(self).value
 
     #@debug
-    def ReadRawStrip(self, strip, buf, size): 
+    def ReadRawStrip(self, strip, buf, size):
         return libtiff.TIFFReadRawStrip(self, strip, buf, size).value
-    def ReadEncodedStrip(self, strip, buf, size): 
+    def ReadEncodedStrip(self, strip, buf, size):
         return libtiff.TIFFReadEncodedStrip(self, strip, buf, size).value
 
-    def StripSize(self): 
+    def StripSize(self):
         return libtiff.TIFFStripSize(self).value
-    def RawStripSize(self, strip): 
+    def RawStripSize(self, strip):
         return libtiff.TIFFStripSize(self, strip).value
 
     @debug
-    def WriteRawStrip(self, strip, buf, size): 
+    def WriteRawStrip(self, strip, buf, size):
         r = libtiff.TIFFWriteRawStrip(self, strip, buf, size)
         assert r.value==size,`r.value, size`
 
     @debug
-    def WriteEncodedStrip(self, strip, buf, size): 
+    def WriteEncodedStrip(self, strip, buf, size):
         r = libtiff.TIFFWriteEncodedStrip(self, strip, buf, size)
         assert r.value==size,`r.value, size`
 
     closed = False
-    def close(self, libtiff=libtiff): 
+    def close(self, libtiff=libtiff):
         if not self.closed and self.value is not None:
             libtiff.TIFFClose(self)
             self.closed = True
@@ -613,7 +613,7 @@ class TIFF(ctypes.c_void_p):
                         'BitsPerSample', 'CleanFaxData', 'Compression',
                         'DataType', 'FillOrder', 'InkSet', 'Matteing',
                         'MaxSampleValue', 'MinSampleValue', 'Orientation',
-                        'PhotoMetric', 'PlanarConfig', 'Predictor', 
+                        'PhotoMetric', 'PlanarConfig', 'Predictor',
                         'ResolutionUnit', 'SampleFormat', 'YCBCRPositioning',
                         'JPEGQuality', 'JPEGColorMode', 'JPEGTablesMode',
                         'FaxMode', 'SMaxSampleValue', 'SMinSampleValue',
@@ -913,7 +913,7 @@ def _test_copy():
                 if sampleformat in ['int','uint'] and bitspersample > 64:
                     continue
                 #print compression, sampleformat, bitspersample
-                tiff.copy ('/tmp/libtiff_test_copy2.tiff', 
+                tiff.copy ('/tmp/libtiff_test_copy2.tiff',
                            compression=compression,
                            imagedescription='hoo',
                            sampleformat=sampleformat,

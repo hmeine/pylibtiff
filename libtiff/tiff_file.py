@@ -269,10 +269,10 @@ class TIFFfile(TiffBase):
         depth = len(self.IFD)
         compression = ifd.get('Compression').value
         if compression!=1:
-            raise ValueError('Unable to get contiguous image stack from compressed data')            
+            raise ValueError('Unable to get contiguous image stack from compressed data')
         bits_per_sample = ifd0.get('BitsPerSample').value
         photo_interp = ifd0.get('PhotometricInterpretation').value
-        planar_config = ifd0.get('PlanarConfiguration').value        
+        planar_config = ifd0.get('PlanarConfiguration').value
         strip_offsets0 = ifd0.get('StripOffsets').value
         strip_nbytes0 = ifd0.get('StripByteCounts').value
         strip_offsets1 = ifd1.get('StripOffsets').value
@@ -394,7 +394,7 @@ class TIFFfile(TiffBase):
                 compression = ifd.get_value('Compression')
                 if compression!=1:
                     can_return_memmap = False
-                    #raise ValueError('Unable to get contiguous samples from compressed data (compression=%s)' % (compression))            
+                    #raise ValueError('Unable to get contiguous samples from compressed data (compression=%s)' % (compression))
                 width = ifd.get_value('ImageWidth')
                 length = ifd.get_value('ImageLength')
                 samples_per_pixel = ifd.get_value('SamplesPerPixel')
@@ -576,8 +576,8 @@ strip_length : %(strip_length_str)s
             l.append ('-'*50)
             l.append('Subfile type: %s' % (subfile_type))
             l.append('Number of images: %s' % (self.get_depth(subfile_type = subfile_type)))
-            for tag in ['ImageLength', 
-                        'ImageWidth', 
+            for tag in ['ImageLength',
+                        'ImageWidth',
                         'SamplesPerPixel','ExtraSamples',
                         'SampleFormat',
                         'Compression','Predictor',
@@ -680,7 +680,7 @@ class IFD:
                 value = default
         if tag_name in ['StripOffsets', 'StripByteCounts']:
             if not isinstance (value, numpy.ndarray):
-                value = numpy.array([value])                
+                value = numpy.array([value])
         if tag_name in ['BitsPerSample', 'SampleFormat']:
             samples_per_pixel = self.get_value ('SamplesPerPixel')
             if not isinstance (value, numpy.ndarray):

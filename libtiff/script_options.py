@@ -14,7 +14,7 @@ class MyHelpFormatter(TitledHelpFormatter):
         if isinstance (default, str) and ' ' in default:
             default = repr (default)
         if option.help is None:
-            option.help = 'Specify a %s.' % (option.type) 
+            option.help = 'Specify a %s.' % (option.type)
         if option.type=='choice':
             choices = []
             for choice in option.choices:

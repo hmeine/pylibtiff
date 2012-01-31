@@ -118,7 +118,7 @@ def lsminfo(ifdentry, new_lsmblock_start=None):
                         #print value[i]
                     else:
                         sys.stderr.write('Reserved[%s]=%s is out of block range %s. lsminfo might not be correct.' % (i,value[i], ifdentry.block_range))
-        i += dt.itemsize    
+        i += dt.itemsize
 
     return target
 
@@ -379,14 +379,14 @@ class TimeStamps:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value['OffsetTimeStamps'][0]            
+            self._offset = self.ifdentry.value['OffsetTimeStamps'][0]
         return self._offset
 
     @property
     def header(self):
         if self._header is None:
             offset = self.offset
-            self._header = self.ifdentry.tiff.get_value(offset, CZ_LSMTimeStamps_header_dtype)            
+            self._header = self.ifdentry.tiff.get_value(offset, CZ_LSMTimeStamps_header_dtype)
         return self._header
 
     @property
@@ -520,7 +520,7 @@ class EventList:
         sz = self.get_size()
         if target is None:
             target = numpy.zeros((sz,), dtype=numpy.ubyte)
-        dtype = target.dtype     
+        dtype = target.dtype
         header = numpy.array([sz, len (self.events)], dtype=numpy.int32).view(dtype=dtype)
         target[:header.nbytes] = header
         offset = header.nbytes
@@ -557,7 +557,7 @@ class ChannelWavelength:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value['OffsetChannelWavelength'][0]            
+            self._offset = self.ifdentry.value['OffsetChannelWavelength'][0]
         return self._offset
 
     @property
@@ -581,7 +581,7 @@ class ChannelWavelength:
         sz = self.get_size()
         if target is None:
             target = numpy.zeros((sz,), dtype=numpy.ubyte)
-        dtype = target.dtype     
+        dtype = target.dtype
         target[:4].view(dtype=numpy.int32)[0] = len(self.ranges)
         data = numpy.array(self.ranges).ravel()
         target[4:4+data.nbytes] = data.view (dtype=dtype)
@@ -618,7 +618,7 @@ class ChannelColors:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value['OffsetChannelColors'][0]            
+            self._offset = self.ifdentry.value['OffsetChannelColors'][0]
         return self._offset
 
     @property
@@ -719,7 +719,7 @@ class ChannelFactors:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value['OffsetChannelFactors'][0]            
+            self._offset = self.ifdentry.value['OffsetChannelFactors'][0]
         return self._offset
 
     @property
@@ -755,7 +755,7 @@ def channelfactors(ifdentry, debug=True):
     if debug:
         arr = r.toarray()
         arr2 = ifdentry.tiff.data[offset:offset+arr.nbytes]
-        assert (arr==arr2).all()        
+        assert (arr==arr2).all()
     return r
 
 class ChannelDataTypes:
@@ -768,7 +768,7 @@ class ChannelDataTypes:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value['OffsetChannelDataTypes'][0]            
+            self._offset = self.ifdentry.value['OffsetChannelDataTypes'][0]
         return self._offset
 
     @property
@@ -804,7 +804,7 @@ def channeldatatypes(ifdentry, debug=True):
     if debug:
         arr = r.toarray()
         arr2 = ifdentry.tiff.data[offset:offset+arr.nbytes]
-        assert (arr==arr2).all()        
+        assert (arr==arr2).all()
     return r
 
 class OffsetData:
@@ -818,7 +818,7 @@ class OffsetData:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value[self.offset_name][0]            
+            self._offset = self.ifdentry.value[self.offset_name][0]
         return self._offset
 
     @property
@@ -854,7 +854,7 @@ def offsetdata(ifdentry, offset_name, debug=True):
     if debug:
         arr = r.toarray()
         arr2 = ifdentry.tiff.data[offset:offset+arr.nbytes]
-        assert (arr==arr2).all()        
+        assert (arr==arr2).all()
     return r
 
 class DrawingElement:
@@ -868,7 +868,7 @@ class DrawingElement:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value[self.offset_name][0]            
+            self._offset = self.ifdentry.value[self.offset_name][0]
         return self._offset
 
     @property
@@ -904,7 +904,7 @@ def drawingelement(ifdentry, offset_name, debug=True):
     if debug:
         arr = r.toarray()
         arr2 = ifdentry.tiff.data[offset:offset+arr.nbytes]
-        assert (arr==arr2).all()        
+        assert (arr==arr2).all()
     return r
 
 class LookupTable:
@@ -918,7 +918,7 @@ class LookupTable:
     @property
     def offset(self):
         if self._offset is None:
-            self._offset = self.ifdentry.value[self.offset_name][0]            
+            self._offset = self.ifdentry.value[self.offset_name][0]
         return self._offset
 
     @property
@@ -957,7 +957,7 @@ def lookuptable(ifdentry, offset_name, debug=True):
     if debug:
         arr = r.toarray()
         arr2 = ifdentry.tiff.data[offset:offset+arr.nbytes]
-        assert (arr==arr2).all()        
+        assert (arr==arr2).all()
     return r
 
 inputlut = lambda ifdentry, debug=True: lookuptable(ifdentry, 'OffsetInputLut', debug=debug)
@@ -1167,12 +1167,12 @@ scaninfo_map = {
     0x010000062: ( 'recording prescan','LONG'),
     0x010000063: ( 'recording scan directionz','LONG'),
     #0x010000064: ( 'recording ','LONG'),
-    0x030000000: ( 'lasers','SUBBLOCK'), 
+    0x030000000: ( 'lasers','SUBBLOCK'),
     0x050000000: ( 'laser','SUBBLOCK'),
     0x050000001: ( 'laser name','ASCII'),
     0x050000002: ( 'laser acquire','LONG'),
     0x050000003: ( 'laser power','DOUBLE'),
-    0x020000000: ( 'tracks','SUBBLOCK'), 
+    0x020000000: ( 'tracks','SUBBLOCK'),
     0x040000000: ( 'track','SUBBLOCK'),
     0x040000001: ( 'track multiplex type','LONG'),
     0x040000002: ( 'track multiplex order','LONG'),
@@ -1227,7 +1227,7 @@ scaninfo_map = {
     0x070000002: ( 'detection channel special mode','LONG'),
     0x070000003: ( 'detection channel detector gain first','DOUBLE'),
     0x070000004: ( 'detection channel detector gain last','DOUBLE'),
-    0x070000005: ( 'detection channel amplifier gain first','DOUBLE'),    
+    0x070000005: ( 'detection channel amplifier gain first','DOUBLE'),
     0x070000006: ( 'detection channel amplifier gain last','DOUBLE'),
     0x070000007: ( 'detection channel amplifier offs first','DOUBLE'),
     0x070000008: ( 'detection channel amplifier offs last','DOUBLE'),
@@ -1296,15 +1296,15 @@ scaninfo_map = {
     0x0D0000017: ( 'data channel acquire','LONG'),
 
     0x011000000: ( 'timers','SUBBLOCK'),
-    0x012000000: ( 'timer','SUBBLOCK'), 
-    0x012000001: ( 'timer name','ASCII'), 
-    0x012000003: ( 'timer interval','DOUBLE'), 
-    0x012000004: ( 'timer trigger in','ASCII'), 
+    0x012000000: ( 'timer','SUBBLOCK'),
+    0x012000001: ( 'timer name','ASCII'),
+    0x012000003: ( 'timer interval','DOUBLE'),
+    0x012000004: ( 'timer trigger in','ASCII'),
     0x012000005: ( 'timer trigger out','ASCII'),
     0x012000006: ( 'timer activation time','DOUBLE'),
-    0x012000007: ( 'timer activation number','LONG'), 
+    0x012000007: ( 'timer activation number','LONG'),
 
-    0x013000000: ( 'markers','SUBBLOCK'), 
+    0x013000000: ( 'markers','SUBBLOCK'),
     0x014000000: ( 'marker','SUBBLOCK'),
     0x014000001: ( 'marker name','ASCII'),
     0x014000002: ( 'marker description','ASCII'),
