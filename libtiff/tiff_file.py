@@ -268,20 +268,21 @@ class TIFFfile(TiffBase):
         assert width == ifd1.get ('ImageWidth').value
         assert length == ifd1.get ('ImageLength').value
         depth = len(self.IFD)
-        compression = ifd.get('Compression').value
+        compression = ifd0.get('Compression').value
         if compression!=1:
             raise ValueError('Unable to get contiguous image stack from compressed data')
         bits_per_sample = ifd0.get('BitsPerSample').value
-        photo_interp = ifd0.get('PhotometricInterpretation').value
-        planar_config = ifd0.get('PlanarConfiguration').value
+        # photo_interp = ifd0.get('PhotometricInterpretation').value
+        # planar_config = ifd0.get('PlanarConfiguration').value
         strip_offsets0 = ifd0.get('StripOffsets').value
-        strip_nbytes0 = ifd0.get('StripByteCounts').value
+        # strip_nbytes0 = ifd0.get('StripByteCounts').value
         strip_offsets1 = ifd1.get('StripOffsets').value
         strip_nbytes1 = ifd1.get('StripByteCounts').value
         samples_per_pixel = ifd1.get('SamplesPerPixel').value
         assert samples_per_pixel==1,`samples_per_pixel`
 
         if isinstance (bits_per_sample, numpy.ndarray):
+            # FIXME: i not defined (use struct dtype?):
             dtype = getattr (self.dtypes, 'uint%s' % (bits_per_sample[i]))
         else:
             dtype = getattr (self.dtypes, 'uint%s' % (bits_per_sample))

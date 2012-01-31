@@ -691,7 +691,7 @@ that contain spaces must be entered like so: "arg with space"\
 
     def _terminate_process (self, process, method):
         if method=='subprocess':
-            if prosess.is_alive():
+            if process.is_alive():
                 print
                 print 'Terminating runner %s' % (method)
                 process.terminate()
@@ -831,8 +831,8 @@ def check_file(option, opt, value):
     try:
         value = str(value)
     except ValueError:
-        raise OptionValueError(
-            _("option %s: invalid %s value: %r") % (opt, what, value))
+        raise optparse.OptionValueError(
+            "option %s: invalid %s value: %r" % (option, opt, value))
     #if value and not os.path.isfile(value):
     #    print 'Warning: path %r is not a file' % (value)
     return value
@@ -841,8 +841,8 @@ def check_directory(option, opt, value):
     try:
         value = str(value)
     except ValueError:
-        raise OptionValueError(
-            _("option %s: invalid %s value: %r") % (opt, what, value))
+        raise optparse.OptionValueError(
+            "option %s: invalid %s value: %r" % (option, opt, value))
     #if value and not os.path.isdir(value):
     #    print 'Warning: path %r is not a directory' % (value)
     return value
