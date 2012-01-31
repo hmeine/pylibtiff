@@ -19,8 +19,6 @@ __all__ = ['TIFFfile', 'TIFFimage', 'TiffArray']
 
 import os
 import sys
-import time
-import numpy
 
 from .tiff_file import TIFFfile
 from .tiff_image import TIFFimage

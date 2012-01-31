@@ -21,7 +21,6 @@ __all__ = ['OptionParser', 'Option']
 import os
 import signal
 import sys
-import re
 import shutil
 import tempfile
 import optparse

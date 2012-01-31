@@ -1,6 +1,6 @@
 
 import sys
-from os.path import join, basename, dirname, splitext
+from os.path import join, basename, splitext
 from glob import glob
 
 from numpy.distutils import log

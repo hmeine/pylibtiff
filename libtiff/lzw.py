@@ -56,7 +56,6 @@ def encode_bitarray(seq, max_bits=12):
 
     table_update(init_table)
 
-    index = 0
     write(CODECLEAR, bits)
     for c in seq:
         s1 = s + c
@@ -173,7 +172,6 @@ def decode_bitarray(bseq):
     assert bseq.endian ()=='little',`bseq.endian()`
     read = bseq.toword
 
-    init_invtable = [(code, chr(code)) for code in range (256)]
     table = [chr(code) for code in range(256)] + ['CODECLEAR', 'CODEEOI']
     table_append = table.append
     table_len = table.__len__
@@ -197,7 +195,6 @@ def decode_bitarray(bseq):
             i += bits
             old_str = table[code]
             seq_append(old_str)
-            old_code = code
         else:
             l = table_len()
             if code < l:
@@ -209,7 +206,6 @@ def decode_bitarray(bseq):
                 table_append(old_str)
 
             seq_append(old_str)
-            old_code = code
 
             if l==max_code2:
                 bits += 1
@@ -231,7 +227,6 @@ def decode_bittools(bseq):
     --------
     encode_bittools
     """
-    init_invtable = [(code, chr(code)) for code in range (256)]
     table = [chr(code) for code in range(256)] + ['CODECLEAR', 'CODEEOI']
     table_append = table.append
     table_len = table.__len__
@@ -253,7 +248,6 @@ def decode_bittools(bseq):
             code, i = getword(bseq, i, bits)
             old_str = table[code]
             seq_append(old_str)
-            old_code = code
         else:
             l = table_len()
             if code < l:
@@ -265,7 +259,6 @@ def decode_bittools(bseq):
                 table_append(old_str)
 
             seq_append(old_str)
-            old_code = code
 
             if l==max_code2:
                 bits += 1

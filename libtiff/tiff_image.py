@@ -9,10 +9,9 @@ import os
 import sys
 import time
 import numpy
-import lzw
 import tif_lzw
 
-from .utils import bytes2str, VERBOSE
+from .utils import bytes2str
 from .tiff_data import tag_name2value, tag_value2type, tag_value2name, name2type, type2bytes, type2dtype
 
 VERBOSE=True
@@ -342,9 +341,9 @@ class TIFFimage:
 
                 tif = tif_write(tif, image_data_offset, strip)
                 image_data_offset += strip.nbytes
-                if j==0:
-                    first = strip_offsets[0]
-                last = strip_offsets[-1] + strip_byte_counts[-1]
+                # if j==0:
+                #     first = strip_offsets[0]
+                # last = strip_offsets[-1] + strip_byte_counts[-1]
 
 
             # write IFD entries

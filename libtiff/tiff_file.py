@@ -13,7 +13,7 @@ import shutil
 import numpy
 import mmap
 from numpy.testing.utils import memusage
-from .tiff_data import type2name, name2type, type2bytes, type2dtype, tag_value2name, tag_name2value
+from .tiff_data import type2name, name2type, type2bytes, tag_value2name
 from .tiff_data import LittleEndianNumpyDTypes, BigEndianNumpyDTypes, default_tag_values, sample_format_map
 from .utils import bytes2str, isindisk
 from .tiff_base import TiffBase
@@ -235,6 +235,7 @@ class TIFFfile(TiffBase):
         return ok
 
     def is_contiguous(self):
+        end = None
         for i,ifd in enumerate(self.IFD):
             strip_offsets = ifd.get('StripOffsets').value
             strip_nbytes = ifd.get('StripByteCounts').value
@@ -914,7 +915,7 @@ class IFDEntry:
             value = tiff.get_values(self.offset, self.type, self.count)
         if value is not None:
             self.value = value
-        tag_name = self.tag_name = tag_value2name.get(self.tag,'TAG%s' % (hex(self.tag),))
+        self.tag_name = tag_value2name.get(self.tag,'TAG%s' % (hex(self.tag),))
         self.type_name = type2name.get(self.type, 'TYPE%s' % (self.type,))
 
         self.memory_usage = []

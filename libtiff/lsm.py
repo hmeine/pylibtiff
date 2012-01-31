@@ -149,8 +149,6 @@ class LSMBlock:
             target = numpy.zeros((sz,), dtype = numpy.ubyte)
         if new_offset is None:
             new_offset = self.offset
-        offset_diff = new_offset - self.offset
-        dtype = target.dtype
         target[:sz] = self.ifdentry.tiff.data[self.offset:self.offset + sz]
         return target
 
@@ -309,7 +307,6 @@ def scaninfo(ifdentry, debug=True):
     if not n:
         return
     record = None
-    tab = ' '
     while 1:
         entry, type, size = ifdentry.tiff.get_values(n, 'LONG', 3)
         n += 12
@@ -631,7 +628,6 @@ class ChannelColors:
     def header (self):
         if self._header is None:
             self._header = self.ifdentry.tiff.get_values(self.offset, numpy.int32, 10)
-            sz = self._header[0]
         return self._header
 
     @property
@@ -874,7 +870,7 @@ class DrawingElement:
     @property
     def data(self):
         if self._data is None:
-            n = self.ifdentry.tiff.get_value(self.offset, numpy.int32)
+            #n = self.ifdentry.tiff.get_value(self.offset, numpy.int32)
             sz = self.ifdentry.tiff.get_value(self.offset+4, numpy.int32)
             self._data = self.ifdentry.tiff.get_values(self.offset, numpy.ubyte, sz)
         return self._data
